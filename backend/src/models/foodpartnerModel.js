@@ -10,6 +10,10 @@ const foodPartnerSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  category: {
+    type: String,
+    required: true,
+  },
   password: {
     type: String,
     required: true,
