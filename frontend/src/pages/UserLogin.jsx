@@ -1,8 +1,76 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Phone, ArrowRight, Github, Chrome } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 const UserLogin = () => {
-  const [isLogin, setIsLogin] = useState(true);
+
+const [isLogin, setIsLogin] = useState(true);
+
+const [formData, setFormData] = useState({
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+  password: ""
+});
+
+const navigate = useNavigate();
+
+const handleChange = (e) => {
+  setFormData({
+    ...formData,
+    [e.target.name]: e.target.value
+  });
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const url = isLogin
+    ? "http://localhost:3000/api/auth/user/login"
+    : "http://localhost:3000/api/auth/user/register";
+
+  const payload = isLogin
+  ? {
+      email: formData.email,
+      password: formData.password
+    }
+  : {
+      fullName: formData.fullName,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      password: formData.password
+    };
+
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Something went wrong");
+      return;
+    }
+
+    if (isLogin) {
+      localStorage.setItem("token", data.token);
+      alert("Login successful");
+      navigate("/home");
+      // navigate("/") later
+    } else {
+      alert("Registration successful. Please login.");
+      setIsLogin(true);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
 
   return (
     <div className="min-h-screen bg-white flex flex-col md:flex-row font-sans">
@@ -55,13 +123,16 @@ const UserLogin = () => {
           </div>
 
           {/* Actual Form */}
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {!isLogin && (
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input 
                   type="text" 
+                  name="fullName"
                   placeholder="Full Name" 
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
                 />
               </div>
@@ -71,7 +142,10 @@ const UserLogin = () => {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input 
                 type="email" 
+                name="email"
                 placeholder="Email Address" 
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
               />
             </div>
@@ -81,7 +155,10 @@ const UserLogin = () => {
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input 
                   type="tel" 
+                  name="phoneNumber"
                   placeholder="Phone Number" 
+                  value={formData.phone}
+                  onChange={handleChange}
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
                 />
               </div>
@@ -91,7 +168,10 @@ const UserLogin = () => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input 
                 type="password" 
+                name="password"
                 placeholder="Password" 
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
               />
             </div>

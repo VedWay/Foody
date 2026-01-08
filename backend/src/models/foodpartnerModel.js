@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const foodPartnerSchema = new mongoose.Schema({
-  name: {
+  restaurantName: {
     type: String,
     required: true,
   },
@@ -10,7 +10,7 @@ const foodPartnerSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  category: {
+  businessCategory: {
     type: String,
     required: true,
   },

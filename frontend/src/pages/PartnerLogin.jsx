@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Store, 
   Lock, 
   Mail, 
-  User, 
   ArrowRight, 
   CheckCircle2, 
   Briefcase, 
@@ -12,6 +12,67 @@ import {
 
 const PartnerLogin = () => {
   const [isLogin, setIsLogin] = useState(true);
+
+  const [formData, setFormData] = useState({
+  restaurantName: "",
+  businessCategory: "",
+  email: "",
+  password: ""
+});
+
+const handleChange = (e) => {
+  setFormData({
+    ...formData,
+    [e.target.name]: e.target.value
+  });
+};
+
+const navigate = useNavigate();
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const url = isLogin
+    ? "http://localhost:3000/api/auth/partner/login"
+    : "http://localhost:3000/api/auth/partner/register";
+
+  const payload = isLogin
+    ? {
+        email: formData.email,
+        password: formData.password
+      }
+    : formData;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Something went wrong");
+      return;
+    }
+
+    if (isLogin) {
+      localStorage.setItem("partnerToken", data.token);
+      alert("Partner login successful");
+      navigate("/partner/home");
+    } else {
+      alert("Registration successful. Please login.");
+      setIsLogin(true);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-white flex flex-col md:flex-row font-sans">
@@ -81,20 +142,27 @@ const PartnerLogin = () => {
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {!isLogin && (
               <>
                 <div className="relative">
                   <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
                     type="text" 
+                    name="restaurantName"
                     placeholder="Restaurant / Business Name" 
+                    value={formData.restaurantName}
+                    onChange={handleChange}
                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
                   />
                 </div>
                 <div className="relative">
                   <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <select className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition appearance-none text-slate-500">
+                  <select className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition appearance-none text-slate-500"
+                    name="businessCategory"
+                    value={formData.businessCategory}
+                    onChange={handleChange}
+                  >
                     <option>Select Business Category</option>
                     <option>Fine Dining</option>
                     <option>Fast Food / QSR</option>
@@ -109,6 +177,9 @@ const PartnerLogin = () => {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Business Email Address" 
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
               />
@@ -117,7 +188,10 @@ const PartnerLogin = () => {
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
-                type="password" 
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange} 
                 placeholder="Password" 
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
               />

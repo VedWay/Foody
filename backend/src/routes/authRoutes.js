@@ -8,8 +8,8 @@ router.post('/user/register', registerUser);
 router.post('/user/login', loginUser);
 router.post('/user/logout', logoutUser);
 
-router.post('/foodpartner/register', registerfoodPartner);
-router.post('/foodpartner/login', loginfoodPartner);
-router.post('/foodpartner/logout', logoutfoodPartner);
+router.post('/partner/register', registerfoodPartner);
+router.post('/partner/login', loginfoodPartner);
+router.post('/partner/logout', logoutfoodPartner);
 
 export default router;
