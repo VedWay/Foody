@@ -1,4 +1,6 @@
+import { apiRequest } from "../utils/api";
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ClipboardList, 
@@ -17,12 +19,26 @@ import {
 
 const PartnerHome = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
 
   const activeOrders = [
     { id: "#FD-9021", items: "2x Classic Burger, 1x Large Fries", total: "$32.50", time: "5 mins ago", status: "New" },
     { id: "#FD-9018", items: "1x Family Pizza, 3x Coke", total: "$45.00", time: "12 mins ago", status: "Preparing" },
     { id: "#FD-9015", items: "4x Spicy Tacos", total: "$22.00", time: "18 mins ago", status: "Preparing" },
   ];
+
+  const handleLogout = async () => {
+  try {
+    await apiRequest("/auth/user/logout", { method: "POST" }, "partner");
+  } catch (err) {
+    // even if backend fails, we still logout locally
+    console.error("Logout API failed");
+  } finally {
+    // 🔥 MUST DO THIS
+    localStorage.removeItem("partnerToken");
+    navigate("/foodpartner/login", { replace: true });
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
@@ -35,14 +51,13 @@ const PartnerHome = () => {
         
         <nav className="flex-1 px-4 space-y-2">
           {[
-            { name: 'Dashboard', icon: <LayoutDashboard size={20} />, active: true },
-            { name: 'Live Orders', icon: <ClipboardList size={20} />, badge: "3" },
-            { name: 'Menu Manager', icon: <Utensils size={20} /> },
+            { name: 'Dashboard', icon: <LayoutDashboard size={20} />, active: true},    
+            { name: 'Menu Manager', icon: <Utensils size={20} />, path: '/partner/food' },
             { name: 'Reviews', icon: <Star size={20} /> },
-            { name: 'Insights', icon: <TrendingUp size={20} /> },
             { name: 'Store Settings', icon: <Settings size={20} /> },
           ].map((item, i) => (
-            <button key={i} className={`w-full flex items-center justify-between p-3 rounded-xl transition ${item.active ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/20' : 'hover:bg-slate-800 hover:text-white'}`}>
+            <button key={i} className={`w-full flex items-center justify-between p-3 rounded-xl transition ${item.active ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/20' : 'hover:bg-slate-800 hover:text-white'}`}
+             onClick={() => item.path && navigate(item.path)}>
               <div className="flex items-center gap-3 font-semibold text-sm">
                 {item.icon} {item.name}
               </div>
@@ -53,7 +68,7 @@ const PartnerHome = () => {
 
         <div className="p-4 border-t border-slate-800">
           <button className="w-full flex items-center gap-3 p-3 text-sm font-semibold hover:text-white transition">
-            <LogOut size={20} /> Log Out
+            <LogOut size={20} onClick={handleLogout}/> Log Out
           </button>
         </div>
       </aside>

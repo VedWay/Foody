@@ -45,7 +45,9 @@ const handleSubmit = async (e) => {
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(payload)
     });
 
@@ -57,12 +59,22 @@ const handleSubmit = async (e) => {
     }
 
     if (isLogin) {
+      // Store the token in localStorage
       localStorage.setItem("token", data.token);
+      
+      // For subsequent requests, you can create an axios instance or a fetch wrapper
+      // that automatically adds the token to the Authorization header
       alert("Login successful");
       navigate("/home");
-      // navigate("/") later
     } else {
       alert("Registration successful. Please login.");
+      // Clear the form
+      setFormData({
+        fullName: "",
+        email: "",
+        phoneNumber: "",
+        password: ""
+      });
       setIsLogin(true);
     }
 
@@ -131,7 +143,7 @@ const handleSubmit = async (e) => {
                   type="text" 
                   name="fullName"
                   placeholder="Full Name" 
-                  value={formData.name}
+                  value={formData.fullName}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
                 />
@@ -157,7 +169,7 @@ const handleSubmit = async (e) => {
                   type="tel" 
                   name="phoneNumber"
                   placeholder="Phone Number" 
-                  value={formData.phone}
+                  value={formData.phoneNumber}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition"
                 />

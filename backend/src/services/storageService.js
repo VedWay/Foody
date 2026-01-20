@@ -8,11 +8,15 @@ function getImageKitInstance() {
     });
 }
 
-export async function uploadFile(file, fileName) {
-    const imagekit = getImageKitInstance();  // Initialize now
+export async function uploadFile(fileBuffer, fileName) {
+    const imagekit = getImageKitInstance();
+
+    const base64File = fileBuffer.toString("base64");
+
     const result = await imagekit.upload({
-        file,
-        fileName
+        file: base64File,
+        fileName,
     });
+
     return result;
 }

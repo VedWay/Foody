@@ -61,6 +61,7 @@ export const loginUser = async (req, res) => {
 
         res.status(200).json({
             message: "Login successful",
+            token,
             user: {
                 _id: user._id,
                 fullName: user.fullName,
@@ -80,7 +81,7 @@ export const logoutUser = (req, res) => {
 
 export const registerfoodPartner = async (req, res) => {
   try{
-    const { name, email, password } = req.body;
+    const { restaurantName, businessCategory, email, password } = req.body;
     
     const isAlreadyRegistered = await foodPartnerModel.findOne({ email });
     if (isAlreadyRegistered) {
@@ -90,7 +91,8 @@ export const registerfoodPartner = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const foodPartner = await foodPartnerModel.create({
-      name: name,
+      restaurantName,    // Ensure these match your foodpartnerModel.js
+      businessCategory,
       email,
       password: hashedPassword
     });
@@ -104,6 +106,7 @@ export const registerfoodPartner = async (req, res) => {
     res.status(201).json({
       message: "Food Partner registered successfully",
       foodPartner: {
+        token: token,
         _id: foodPartner._id,
         name: foodPartner.name,
         email: foodPartner.email
@@ -116,34 +119,39 @@ export const registerfoodPartner = async (req, res) => {
 }
 
 export const loginfoodPartner = async (req, res) => {
-  try{
-      const {email, password} = req.body;
+  try {
+    const { email, password } = req.body;
+    const foodPartner = await foodPartnerModel.findOne({ email });
 
-      const foodPartner = await foodPartnerModel.findOne({email});
-      if(!foodPartner){
-          return res.status(400).json({message: "Food Partner not found"});
-      }
+    if (!foodPartner) {
+      return res.status(400).json({ message: "Food Partner not found" });
+    }
 
-      const isPasswordValid = await bcrypt.compare(password, foodPartner.password);
-      if(!isPasswordValid){
-          return res.status(400).json({message: "Invalid credentials"});
+    const isPasswordValid = await bcrypt.compare(password, foodPartner.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d"
+    });
+
+    // Keep this if you want cookies, BUT...
+    res.cookie("token", token);
+    
+    // ADD THE TOKEN HERE for the Frontend localStorage
+    res.status(200).json({
+      message: "Login successful",
+      token: token, // <--- THIS WAS MISSING
+      foodPartner: {
+        _id: foodPartner._id,
+        name: foodPartner.name,
+        email: foodPartner.email
       }
-      const token = jwt.sign({id: foodPartner._id}, process.env.JWT_SECRET, {
-          expiresIn: "1d"
-      });
-      res.cookie("token", token);
-      
-      res.status(200).json({
-          message: "Login successful",
-          foodPartner: {
-              _id: foodPartner._id,
-              name: foodPartner.name,
-              email: foodPartner.email
-          }
-      });
-  } catch(err){
-      console.error(err);
-      res.status(500).json({message: "Server error", error: err.message});
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
