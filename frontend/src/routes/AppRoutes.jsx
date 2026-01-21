@@ -9,6 +9,7 @@ import HomePage from '../pages/HomePage.jsx';
 import PartnerFood from '../pages/PartnerFood.jsx';
 import PartnerProtectedRoute from '../protected/partnerProtectedRoute.jsx';
 import UserProtectedRoute from '../protected/userProtectedRoute.jsx';
+import UserMenu from '../pages/UserMenu.jsx';
 const appRoutes = () => {
   return (
     <Router>
@@ -32,6 +33,12 @@ const appRoutes = () => {
           <PartnerFood />
           </PartnerProtectedRoute>
           } />
+
+          <Route path = "/user/restaurant/:partnerId" element = {
+            <UserProtectedRoute>
+            <UserMenu />
+            </UserProtectedRoute>
+            } />
       </Routes>
     </Router>
   )
